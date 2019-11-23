@@ -4,7 +4,9 @@ const app = new Koa();
 const router = new Router();
 const PORT = 3003;
 const { log, error } = console;
-const request = require('request');
+const path = require('path');
+const fs = require('fs');
+
 app
   .use(async (ctx, next) => {
   log(ctx.url);
@@ -25,12 +27,11 @@ ctx.set('Content-Type', 'text/html; charset=utf-8');
   })
   .use(router.routes())
   .listen(process.env.PORT || PORT, () => log(process.pid));
-
-router
+ 
+  router
   .get('/', async (ctx, next) => {
-    //ctx.body = 'Привет мир!';
-    ctx.body = ctx.req.pipe(request(`http://kodaktor.ru/x`));
+    const stream = fs.createReadStream(path.resolve(__dirname, 'index.js'));
+    ctx.status = 200;
+    ctx.response.set('Content-Type', 'application/javascript; charset=utf-8');
+    ctx.body = stream;
   })
-  .get('/author', async (ctx, next) => {
-    ctx.throw(403, 'У вас пока нет доступа!');
-  });
